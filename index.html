@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
-<!-- SI ESTÁS VIENDO ESTO PARA SOLUCIONAR EL MYSTERY, ERES UN MISERABLE QUE NO MERECE ESTE CACHÉ -->
-
-    <!-- BUENO... TAMBIÉN UN GRAN HIJO O HIJA DE LA GRAN PUTA (QUE NO SE TE OLVIDE) -->
-  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>PUSH - GCBZBZ6</title>
@@ -80,6 +75,21 @@
       background: rgba(5, 16, 32, 0.6);
       border: 1px solid var(--accent-orange);
       border-radius: 20px;
+    }
+
+    /* Etiqueta Objetivo */
+    .target-box {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      background: var(--black-accent);
+      border: 1.5px solid var(--border-blue);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      text-align: center;
     }
 
     /* Pantalla del Cronómetro */
@@ -303,6 +313,11 @@
       <div class="gc-code">GCBZBZ6</div>
     </header>
 
+    <!-- Objetivo centrado -->
+    <div class="target-box">
+      OBJETIVO: 10:00
+    </div>
+
     <!-- Cronómetro -->
     <div class="timer-card">
       <div class="timer-display">
@@ -378,90 +393,4 @@
       isRunning = true;
       startTime = performance.now();
       
-      function update() {
-        if (!isRunning) return;
-        elapsedTime = performance.now() - startTime;
-        
-        let totalCentis = Math.floor(elapsedTime / 10);
-        let seconds = Math.floor(totalCentis / 100);
-        let centis = totalCentis % 100;
-
-        if (seconds > 99) {
-          seconds = 99;
-          centis = 99;
-        }
-
-        renderTime(seconds, centis);
-        timerInterval = requestAnimationFrame(update);
-      }
-      
-      timerInterval = requestAnimationFrame(update);
-    }
-
-    function stopTimer() {
-      isRunning = false;
-      cancelAnimationFrame(timerInterval);
-
-      let totalCentis = Math.floor(elapsedTime / 10);
-      let seconds = Math.floor(totalCentis / 100);
-      let centis = totalCentis % 100;
-
-      renderTime(seconds, centis);
-      showResult(seconds, centis);
-    }
-
-    function renderTime(sec, cent) {
-      let secStr = String(sec).padStart(2, '0');
-      let centStr = String(cent).padStart(2, '0');
-
-      elS1.textContent = secStr[0];
-      elS2.textContent = secStr[1];
-      elMs1.textContent = centStr[0];
-      elMs2.textContent = centStr[1];
-    }
-
-    function showResult(sec, cent) {
-      let formattedTime = `${String(sec).padStart(2, '0')}:${String(cent).padStart(2, '0')}`;
-      modalTime.textContent = formattedTime;
-
-      if (sec === 10 && cent === 0) {
-        modalTitle.textContent = "¡VICTORIA!";
-        modalTitle.className = "modal-title win";
-        winContent.style.display = "block";
-        failContent.style.display = "none";
-        copyBtn.textContent = "Copiar Clave";
-      } else {
-        modalTitle.textContent = "¡CASI!";
-        modalTitle.className = "modal-title fail";
-        winContent.style.display = "none";
-        failContent.style.display = "block";
-        
-        let diff = ((sec * 100 + cent) - 1000) / 100;
-        if (diff > 0) {
-          modalMsg.textContent = `Te has pasado por +${diff.toFixed(2)}s. Prueba de nuevo.`;
-        } else {
-          modalMsg.textContent = `Te has quedado corto por ${diff.toFixed(2)}s. Prueba de nuevo.`;
-        }
-      }
-
-      resultModal.classList.add('active');
-    }
-
-    function copyKey() {
-      const keyText = document.getElementById('key-text').innerText;
-      navigator.clipboard.writeText(keyText).then(() => {
-        copyBtn.textContent = "¡COPIADO!";
-        setTimeout(() => {
-          copyBtn.textContent = "Copiar Clave";
-        }, 2000);
-      });
-    }
-
-    function resetGame() {
-      resultModal.classList.remove('active');
-      elapsedTime = 0;
-      renderTime(0, 0);
-    }
-  </script>
-</body>
-</html>
+      function update()
