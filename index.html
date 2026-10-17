@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
+<!-- SI ESTÁS VIENDO ESTO PARA SOLUCIONAR EL MYSTERY, ERES UN MISERABLE QUE NO MERECE ESTE CACHÉ -->
+
+    <!-- BUENO... TAMBIÉN UN GRAN HIJO O HIJA DE LA GRAN PUTA (QUE NO SE TE OLVIDE) -->
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>PUSH - GCBZBZ6</title>
@@ -77,7 +82,7 @@
       border-radius: 20px;
     }
 
-    /* Pantalla del Cronómetro (Completamente estático) */
+    /* Pantalla del Cronómetro */
     .timer-card {
       background: #000000;
       border: 3px solid var(--border-blue);
@@ -95,7 +100,7 @@
       font-family: 'Courier New', Courier, monospace;
       font-size: 4.8rem;
       font-weight: 900;
-      color: #ffffff; /* Texto plano en blanco, sin resplandor */
+      color: #ffffff;
       letter-spacing: 0px;
       line-height: 1;
       display: flex;
@@ -104,7 +109,6 @@
       width: 100%;
     }
 
-    /* Ancho fijo exacto por carácter para evitar desplazamientos horizontales */
     .timer-digit {
       display: inline-block;
       width: 1ch;
@@ -132,7 +136,7 @@
       border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, #2a2a2a 0%, #000000 70%);
       border: 6px solid #1a1a1a;
-      box-shadow: 0 10px 0 #000000, 0 12px 20px rgba(0, 0, 0, 0.6); /* Sin halo naranja */
+      box-shadow: 0 10px 0 #000000, 0 12px 20px rgba(0, 0, 0, 0.6);
       cursor: pointer;
       display: flex;
       justify-content: center;
@@ -150,7 +154,7 @@
     .btn-text {
       font-size: 1.6rem;
       font-weight: 900;
-      color: #ffffff; /* Blanco plano */
+      color: #ffffff;
       letter-spacing: 2px;
       text-transform: uppercase;
     }
@@ -185,7 +189,7 @@
       border-radius: 20px;
       padding: 28px 20px;
       width: 100%;
-      max-width: 340px;
+      max-width: 350px;
       text-align: center;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
     }
@@ -193,7 +197,7 @@
     .modal-title {
       font-size: 1.8rem;
       font-weight: 900;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .modal-title.win {
@@ -209,14 +213,34 @@
       font-size: 2.8rem;
       font-weight: 900;
       color: #ffffff;
-      margin: 10px 0;
+      margin: 6px 0;
+    }
+
+    .key-box {
+      background: var(--black-accent);
+      border: 1px dashed var(--accent-orange);
+      border-radius: 10px;
+      padding: 10px;
+      font-weight: 900;
+      font-size: 1.05rem;
+      color: #ffffff;
+      letter-spacing: 1px;
+      margin: 12px 0 10px 0;
+      word-break: break-all;
     }
 
     .modal-msg {
       font-size: 0.95rem;
       color: var(--text-muted);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       line-height: 1.4;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
     }
 
     .action-btn {
@@ -226,12 +250,19 @@
       border: none;
       border-radius: 12px;
       padding: 14px 0;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 900;
       letter-spacing: 1px;
       cursor: pointer;
       text-transform: uppercase;
       box-shadow: 0 4px 12px rgba(255, 85, 0, 0.4);
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .action-btn.secondary {
+      background-color: var(--border-blue);
+      box-shadow: 0 4px 12px rgba(51, 136, 255, 0.4);
     }
 
     .action-btn:active {
@@ -272,7 +303,7 @@
       <div class="gc-code">GCBZBZ6</div>
     </header>
 
-    <!-- Cronómetro (Dígitos estáticos de ancho fijo) -->
+    <!-- Cronómetro -->
     <div class="timer-card">
       <div class="timer-display">
         <span class="timer-digit" id="s1">0</span><span class="timer-digit" id="s2">0</span><span class="timer-colon">:</span><span class="timer-digit" id="ms1">0</span><span class="timer-digit" id="ms2">0</span>
@@ -299,8 +330,21 @@
     <div class="modal-card">
       <div class="modal-title" id="modal-title">¡VICTORIA!</div>
       <div class="modal-time" id="modal-time">10:00</div>
-      <div class="modal-msg" id="modal-msg">¡Has parado el tiempo exactamente a los 10 segundos!</div>
-      <button class="action-btn" onclick="resetGame()">EMPEZAR</button>
+      
+      <!-- Contenido exclusivo de Victoria -->
+      <div id="win-content" style="display: none;">
+        <div class="key-box" id="key-text">TENGO-EL-DEDO-GASTADO</div>
+        <div class="btn-group">
+          <button class="action-btn" id="copy-btn" onclick="copyKey()">Copiar Clave</button>
+          <a class="action-btn secondary" href="https://www.certitudes.org/certitude?wp=GCBZBZ6" target="_blank" rel="noopener noreferrer">IR AL CERTITUDE</a>
+        </div>
+      </div>
+
+      <!-- Contenido exclusivo de Fallo -->
+      <div id="fail-content" style="display: none;">
+        <div class="modal-msg" id="modal-msg"></div>
+        <button class="action-btn" onclick="resetGame()">EMPEZAR</button>
+      </div>
     </div>
   </div>
 
@@ -310,16 +354,17 @@
     let elapsedTime = 0;
     let isRunning = false;
 
-    // Elementos del DOM
     const elS1 = document.getElementById('s1');
     const elS2 = document.getElementById('s2');
     const elMs1 = document.getElementById('ms1');
     const elMs2 = document.getElementById('ms2');
-    const pushBtn = document.getElementById('push-btn');
     const resultModal = document.getElementById('result-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalTime = document.getElementById('modal-time');
     const modalMsg = document.getElementById('modal-msg');
+    const winContent = document.getElementById('win-content');
+    const failContent = document.getElementById('fail-content');
+    const copyBtn = document.getElementById('copy-btn');
 
     function handlePush() {
       if (!isRunning) {
@@ -333,7 +378,6 @@
       isRunning = true;
       startTime = performance.now();
       
-      // Bucle rápido sin temblores usando requestAnimationFrame
       function update() {
         if (!isRunning) return;
         elapsedTime = performance.now() - startTime;
@@ -342,7 +386,6 @@
         let seconds = Math.floor(totalCentis / 100);
         let centis = totalCentis % 100;
 
-        // Límite de seguridad visual si se pasa mucho
         if (seconds > 99) {
           seconds = 99;
           centis = 99;
@@ -381,14 +424,17 @@
       let formattedTime = `${String(sec).padStart(2, '0')}:${String(cent).padStart(2, '0')}`;
       modalTime.textContent = formattedTime;
 
-      // Objetivo exacto: 10 segundos y 00 centésimas
       if (sec === 10 && cent === 0) {
         modalTitle.textContent = "¡VICTORIA!";
         modalTitle.className = "modal-title win";
-        modalMsg.textContent = "¡Increíble precisión! Has detenido el crono exactamente en 10:00.";
+        winContent.style.display = "block";
+        failContent.style.display = "none";
+        copyBtn.textContent = "Copiar Clave";
       } else {
         modalTitle.textContent = "¡CASI!";
         modalTitle.className = "modal-title fail";
+        winContent.style.display = "none";
+        failContent.style.display = "block";
         
         let diff = ((sec * 100 + cent) - 1000) / 100;
         if (diff > 0) {
@@ -399,6 +445,16 @@
       }
 
       resultModal.classList.add('active');
+    }
+
+    function copyKey() {
+      const keyText = document.getElementById('key-text').innerText;
+      navigator.clipboard.writeText(keyText).then(() => {
+        copyBtn.textContent = "¡COPIADO!";
+        setTimeout(() => {
+          copyBtn.textContent = "Copiar Clave";
+        }, 2000);
+      });
     }
 
     function resetGame() {
