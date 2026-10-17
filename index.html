@@ -153,7 +153,7 @@
       align-items: center;
       outline: none;
       transition: transform 0.05s ease, box-shadow 0.05s ease;
-      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     .arcade-button:active, .arcade-button.pressed {
@@ -327,7 +327,7 @@
 
     <!-- Botón Arcade -->
     <div class="button-container">
-      <button class="arcade-button" id="push-btn" onclick="handlePush()">
+      <button class="arcade-button" id="push-btn">
         <span class="btn-text">PUSH</span>
       </button>
     </div>
@@ -340,7 +340,7 @@
     </footer>
   </div>
 
-  <!-- Modal de Resultado -->
+  <!-- Modal de Resultados -->
   <div class="modal-overlay" id="result-modal">
     <div class="modal-card">
       <div class="modal-title" id="modal-title">¡VICTORIA!</div>
@@ -350,7 +350,7 @@
       <div id="win-content" style="display: none;">
         <div class="key-box" id="key-text">TENGO-EL-DEDO-GASTADO</div>
         <div class="btn-group">
-          <button class="action-btn" id="copy-btn" onclick="copyKey()">Copiar Clave</button>
+          <button class="action-btn" id="copy-btn">Copiar Clave</button>
           <a class="action-btn secondary" href="https://www.certitudes.org/certitude?wp=GCBZBZ6" target="_blank" rel="noopener noreferrer">IR AL CERTITUDE</a>
         </div>
       </div>
@@ -358,7 +358,7 @@
       <!-- Contenido exclusivo de Fallo -->
       <div id="fail-content" style="display: none;">
         <div class="modal-msg" id="modal-msg"></div>
-        <button class="action-btn" onclick="resetGame()">EMPEZAR</button>
+        <button class="action-btn" id="retry-btn">EMPEZAR</button>
       </div>
     </div>
   </div>
@@ -368,11 +368,13 @@
     let startTime = 0;
     let elapsedTime = 0;
     let isRunning = false;
+    let audioCtx = null;
 
     const elS1 = document.getElementById('s1');
     const elS2 = document.getElementById('s2');
     const elMs1 = document.getElementById('ms1');
     const elMs2 = document.getElementById('ms2');
+    const pushBtn = document.getElementById('push-btn');
     const resultModal = document.getElementById('result-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalTime = document.getElementById('modal-time');
@@ -380,6 +382,82 @@
     const winContent = document.getElementById('win-content');
     const failContent = document.getElementById('fail-content');
     const copyBtn = document.getElementById('copy-btn');
+    const retryBtn = document.getElementById('retry-btn');
+
+    // Inicializar Audio Context con interacción del usuario
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Efectos de sonido sintetizados
+    function playSound(type) {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'win') {
+          // Melodía alegre de victoria
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'sine';
+            o.frequency.setValueAtTime(freq, now + idx * 0.1);
+            g.gain.setValueAtTime(0.2, now + idx * 0.1);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.3);
+            o.start(now + idx * 0.1);
+            o.stop(now + idx * 0.1 + 0.3);
+          });
+        } else if (type === 'fail') {
+          // Zumbido grave de fallo
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(120, now);
+          osc.frequency.setValueAtTime(80, now + 0.15);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        }
+      } catch (e) {
+        console.log("Audio not supported or blocked");
+      }
+    }
+
+    // Asignación robusta del pulsador arcade (compatible con táctil y ratón)
+    pushBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      handlePush();
+    });
+
+    retryBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      resetGame();
+    });
+
+    copyBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      copyKey();
+    });
 
     function handlePush() {
       if (!isRunning) {
@@ -390,7 +468,99 @@
     }
 
     function startTimer() {
+      initAudio();
+      playSound('click');
       isRunning = true;
       startTime = performance.now();
       
-      function update()
+      function update() {
+        if (!isRunning) return;
+        elapsedTime = performance.now() - startTime;
+        
+        let totalCentis = Math.floor(elapsedTime / 10);
+        let seconds = Math.floor(totalCentis / 100);
+        let centis = totalCentis % 100;
+
+        if (seconds > 99) {
+          seconds = 99;
+          centis = 99;
+        }
+
+        renderTime(seconds, centis);
+        timerInterval = requestAnimationFrame(update);
+      }
+      
+      timerInterval = requestAnimationFrame(update);
+    }
+
+    function stopTimer() {
+      isRunning = false;
+      cancelAnimationFrame(timerInterval);
+      playSound('click');
+
+      let totalCentis = Math.floor(elapsedTime / 10);
+      let seconds = Math.floor(totalCentis / 100);
+      let centis = totalCentis % 100;
+
+      renderTime(seconds, centis);
+      showResult(seconds, centis);
+    }
+
+    function renderTime(sec, cent) {
+      let secStr = String(sec).padStart(2, '0');
+      let centStr = String(cent).padStart(2, '0');
+
+      elS1.textContent = secStr[0];
+      elS2.textContent = secStr[1];
+      elMs1.textContent = centStr[0];
+      elMs2.textContent = centStr[1];
+    }
+
+    function showResult(sec, cent) {
+      let formattedTime = `${String(sec).padStart(2, '0')}:${String(cent).padStart(2, '0')}`;
+      modalTime.textContent = formattedTime;
+
+      if (sec === 10 && cent === 0) {
+        playSound('win');
+        modalTitle.textContent = "¡VICTORIA!";
+        modalTitle.className = "modal-title win";
+        winContent.style.display = "block";
+        failContent.style.display = "none";
+        copyBtn.textContent = "Copiar Clave";
+      } else {
+        playSound('fail');
+        modalTitle.textContent = "¡CASI!";
+        modalTitle.className = "modal-title fail";
+        winContent.style.display = "none";
+        failContent.style.display = "block";
+        
+        let diff = ((sec * 100 + cent) - 1000) / 100;
+        if (diff > 0) {
+          modalMsg.textContent = `Te has pasado por +${diff.toFixed(2)}s. Prueba de nuevo.`;
+        } else {
+          modalMsg.textContent = `Te has quedado corto por ${diff.toFixed(2)}s. Prueba de nuevo.`;
+        }
+      }
+
+      resultModal.classList.add('active');
+    }
+
+    function copyKey() {
+      const keyText = document.getElementById('key-text').innerText;
+      navigator.clipboard.writeText(keyText).then(() => {
+        copyBtn.textContent = "¡COPIADO!";
+        setTimeout(() => {
+          copyBtn.textContent = "Copiar Clave";
+        }, 2000);
+      });
+    }
+
+    function resetGame() {
+      playSound('click');
+      resultModal.classList.remove('active');
+      elapsedTime = 0;
+      renderTime(0, 0);
+    }
+  </script>
+</body>
+</html>
