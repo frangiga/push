@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>PUSH - GCBZBZ6</title>
+  <style>
+    :root {
+      --bg-color: #0b2545;
+      --bg-gradient-end: #134074;
+      --border-blue: #3388ff;
+      --accent-orange: #ff5500;
+      --black-accent: #051020;
+      --text-main: #ffffff;
+      --text-muted: #8da9c4;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden; /* Cero scroll */
+      background: linear-gradient(180deg, var(--bg-color) 0%, var(--bg-gradient-end) 100%);
+      color: var(--text-main);
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px)) 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+    }
+
+    /* Encabezado */
+    header {
+      text-align: center;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .gc-code {
+      display: inline-block;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent-orange);
+      letter-spacing: 2px;
+      margin-top: 4px;
+      padding: 4px 14px;
+      background: rgba(5, 16, 32, 0.6);
+      border: 1px solid var(--accent-orange);
+      border-radius: 20px;
+    }
+
+    /* Pantalla del Cronómetro (Completamente estático) */
+    .timer-card {
+      background: #000000;
+      border: 3px solid var(--border-blue);
+      border-radius: 18px;
+      padding: 24px 10px;
+      text-align: center;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .timer-display {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 4.8rem;
+      font-weight: 900;
+      color: #ffffff; /* Texto plano en blanco, sin resplandor */
+      letter-spacing: 0px;
+      line-height: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* Ancho fijo exacto por carácter para evitar desplazamientos horizontales */
+    .timer-digit {
+      display: inline-block;
+      width: 1ch;
+      text-align: center;
+    }
+
+    .timer-colon {
+      display: inline-block;
+      width: 0.5ch;
+      text-align: center;
+    }
+
+    /* Pulsador Arcade */
+    .button-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .arcade-button {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #2a2a2a 0%, #000000 70%);
+      border: 6px solid #1a1a1a;
+      box-shadow: 0 10px 0 #000000, 0 12px 20px rgba(0, 0, 0, 0.6); /* Sin halo naranja */
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      outline: none;
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .arcade-button:active, .arcade-button.pressed {
+      transform: translateY(6px);
+      box-shadow: 0 4px 0 #000000, 0 6px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn-text {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #ffffff; /* Blanco plano */
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Modal de Resultados */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 16, 32, 0.88);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: linear-gradient(145deg, #0b2545, #001d4a);
+      border: 2px solid var(--accent-orange);
+      border-radius: 20px;
+      padding: 28px 20px;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .modal-title.win {
+      color: #00ff88;
+    }
+
+    .modal-title.fail {
+      color: var(--accent-orange);
+    }
+
+    .modal-time {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin: 10px 0;
+    }
+
+    .modal-msg {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    .action-btn {
+      width: 100%;
+      background-color: var(--accent-orange);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 0;
+      font-size: 1.1rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(255, 85, 0, 0.4);
+    }
+
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Footer */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .signature {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .signature a {
+      color: var(--accent-orange);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .signature a:hover, .signature a:active {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Cabecera -->
+    <header>
+      <h1>PUSH</h1>
+      <div class="gc-code">GCBZBZ6</div>
+    </header>
+
+    <!-- Cronómetro (Dígitos estáticos de ancho fijo) -->
+    <div class="timer-card">
+      <div class="timer-display">
+        <span class="timer-digit" id="s1">0</span><span class="timer-digit" id="s2">0</span><span class="timer-colon">:</span><span class="timer-digit" id="ms1">0</span><span class="timer-digit" id="ms2">0</span>
+      </div>
+    </div>
+
+    <!-- Botón Arcade -->
+    <div class="button-container">
+      <button class="arcade-button" id="push-btn" onclick="handlePush()">
+        <span class="btn-text">PUSH</span>
+      </button>
+    </div>
+
+    <!-- Pie de página -->
+    <footer>
+      <div class="signature">
+        Desarrollado por <a href="https://www.instagram.com/fran_giga/" target="_blank" rel="noopener noreferrer">fran_giga</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal de Resultado -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal-card">
+      <div class="modal-title" id="modal-title">¡VICTORIA!</div>
+      <div class="modal-time" id="modal-time">10:00</div>
+      <div class="modal-msg" id="modal-msg">¡Has parado el tiempo exactamente a los 10 segundos!</div>
+      <button class="action-btn" onclick="resetGame()">EMPEZAR</button>
+    </div>
+  </div>
+
+  <script>
+    let timerInterval = null;
+    let startTime = 0;
+    let elapsedTime = 0;
+    let isRunning = false;
+
+    // Elementos del DOM
+    const elS1 = document.getElementById('s1');
+    const elS2 = document.getElementById('s2');
+    const elMs1 = document.getElementById('ms1');
+    const elMs2 = document.getElementById('ms2');
+    const pushBtn = document.getElementById('push-btn');
+    const resultModal = document.getElementById('result-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalTime = document.getElementById('modal-time');
+    const modalMsg = document.getElementById('modal-msg');
+
+    function handlePush() {
+      if (!isRunning) {
+        startTimer();
+      } else {
+        stopTimer();
+      }
+    }
+
+    function startTimer() {
+      isRunning = true;
+      startTime = performance.now();
+      
+      // Bucle rápido sin temblores usando requestAnimationFrame
+      function update() {
+        if (!isRunning) return;
+        elapsedTime = performance.now() - startTime;
+        
+        let totalCentis = Math.floor(elapsedTime / 10);
+        let seconds = Math.floor(totalCentis / 100);
+        let centis = totalCentis % 100;
+
+        // Límite de seguridad visual si se pasa mucho
+        if (seconds > 99) {
+          seconds = 99;
+          centis = 99;
+        }
+
+        renderTime(seconds, centis);
+        timerInterval = requestAnimationFrame(update);
+      }
+      
+      timerInterval = requestAnimationFrame(update);
+    }
+
+    function stopTimer() {
+      isRunning = false;
+      cancelAnimationFrame(timerInterval);
+
+      let totalCentis = Math.floor(elapsedTime / 10);
+      let seconds = Math.floor(totalCentis / 100);
+      let centis = totalCentis % 100;
+
+      renderTime(seconds, centis);
+      showResult(seconds, centis);
+    }
+
+    function renderTime(sec, cent) {
+      let secStr = String(sec).padStart(2, '0');
+      let centStr = String(cent).padStart(2, '0');
+
+      elS1.textContent = secStr[0];
+      elS2.textContent = secStr[1];
+      elMs1.textContent = centStr[0];
+      elMs2.textContent = centStr[1];
+    }
+
+    function showResult(sec, cent) {
+      let formattedTime = `${String(sec).padStart(2, '0')}:${String(cent).padStart(2, '0')}`;
+      modalTime.textContent = formattedTime;
+
+      // Objetivo exacto: 10 segundos y 00 centésimas
+      if (sec === 10 && cent === 0) {
+        modalTitle.textContent = "¡VICTORIA!";
+        modalTitle.className = "modal-title win";
+        modalMsg.textContent = "¡Increíble precisión! Has detenido el crono exactamente en 10:00.";
+      } else {
+        modalTitle.textContent = "¡CASI!";
+        modalTitle.className = "modal-title fail";
+        
+        let diff = ((sec * 100 + cent) - 1000) / 100;
+        if (diff > 0) {
+          modalMsg.textContent = `Te has pasado por +${diff.toFixed(2)}s. Prueba de nuevo.`;
+        } else {
+          modalMsg.textContent = `Te has quedado corto por ${diff.toFixed(2)}s. Prueba de nuevo.`;
+        }
+      }
+
+      resultModal.classList.add('active');
+    }
+
+    function resetGame() {
+      resultModal.classList.remove('active');
+      elapsedTime = 0;
+      renderTime(0, 0);
+    }
+  </script>
+</body>
+</html>
